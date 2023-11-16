@@ -1,0 +1,8 @@
+####################################################################################
+Raspberry Pi Pico Pin		Connected To
+1(GP0)				SDA pin of OLED display
+2(GP1)				SCL pin of OLED display
+4(GP2)				OUT pin of DHT22
+36(3.3V)			Vdd pin of OLED and +ve pin of DHT22
+38(GND)				GND pin of OLED and -ve pin of DHT22
+####################################################################################
