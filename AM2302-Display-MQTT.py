@@ -31,7 +31,7 @@ mqtt_password = config['MQTT']['PASSWORD']
 mqtt_publish_temp_topic = "casaterni/sala/temperatura/sens01"  # The MQTT topic
 mqtt_publish_hum_topic = "casaterni/sala/umidita/sens01"  # The MQTT topic
 # Enter a random ID for this MQTT Client
-mqtt_client_id = "pico-001"
+mqtt_client_id = "pico-002"
 
 # Initialize our MQTTClient and connect to the MQTT server
 mqtt_client = MQTTClient(
@@ -88,4 +88,4 @@ while True:
     printDhtData(temp, hum)
     # Publish the data to the topic
     publishData(temp, hum)
-    time.sleep(3)
+    time.sleep(30)
