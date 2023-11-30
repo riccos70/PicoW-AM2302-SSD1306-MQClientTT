@@ -4,6 +4,7 @@ import ujson
 import dht 
 import network
 import time
+import machine
 from ssd1306 import SSD1306_I2C
 from machine import Pin, I2C
 from umqtt.simple import MQTTClient
@@ -11,43 +12,27 @@ from umqtt.simple import MQTTClient
 with open('config.json', 'r') as f:
     config = ujson.load(f)
 
-# Fill in your WiFi network name (ssid) and password here:
-wifi_ssid = config['WIFI']['SSID']
-wifi_password = config['WIFI']['PASSWORD']
-
-# Connect to WiFi
-wlan = network.WLAN(network.STA_IF)
-wlan.active(True)
-wlan.connect(wifi_ssid, wifi_password)
-while wlan.isconnected() == False:
-    print('Waiting for connection...')
-    time.sleep(1)
-print("Connected to WiFi")
-
 # Fill in your MQTT Broker details
 mqtt_host = config['MQTT']['HOST']
 mqtt_username = config['MQTT']['USERNAME']  
 mqtt_password = config['MQTT']['PASSWORD']
 mqtt_publish_temp_topic = "casaterni/sala/temperatura/sens01"  # The MQTT topic
 mqtt_publish_hum_topic = "casaterni/sala/umidita/sens01"  # The MQTT topic
-# Enter a random ID for this MQTT Client
-mqtt_client_id = "pico-002"
+mqtt_client_id = config['MQTT']['CLIENT_ID']
 
-# Initialize our MQTTClient and connect to the MQTT server
-mqtt_client = MQTTClient(
-        client_id=mqtt_client_id,
-        server=mqtt_host,
-        user=mqtt_username,
-        password=mqtt_password)
-
-mqtt_client.connect()
-
+# Fill in sensor details
 dSensor = dht.DHT22(Pin(2))
 
+#Fill in OLED details
 WIDTH =128 
 HEIGHT= 64
 i2c=I2C(0,scl=Pin(1),sda=Pin(0),freq=200000)
 oled = SSD1306_I2C(WIDTH,HEIGHT,i2c)
+
+def reset():
+    print("Resetting...")
+    time.sleep(5)
+    machine.reset()
 
 def readDHT():
     try:
@@ -60,32 +45,43 @@ def readDHT():
     except OSError as e:
         print('Failed to read data from DHT sensor')
 
-def printDhtData(t,h):
-    oled.fill(0)
-    oled.text("Temp:", 0, 10)
-    oled.text(str(t), 80, 10)
-    oled.text("C", 120, 10)
-    oled.text("Humidity:", 0, 30)
-    oled.text(str(h), 80, 30)
-    oled.text("%", 120, 30)
-    oled.show()
-    
-def publishData(t,h):
+def displayDhtData(t,h):
     try:
-        mqtt_client.publish(mqtt_publish_temp_topic, str(t))
-        mqtt_client.publish(mqtt_publish_hum_topic, str(h))
-        print(f'Publish {t:.1f}')
-        print(f'Publish {h:.1f}')
-    except Exception as e:
-        print(f'Failed to publish message: {e}')
-#    finally:
-#        mqtt_client.disconnect()
+        oled.fill(0)
+        oled.text("Temp:", 0, 10)
+        oled.text(str(t), 80, 10)
+        oled.text("C", 120, 10)
+        oled.text("Humidity:", 0, 30)
+        oled.text(str(h), 80, 30)
+        oled.text("%", 120, 30)
+        oled.show()
+    except OSError as e:
+        print(f'Failed to display data on OLED. Message: {e}')    
+    
+def main():
+    print(f"Begin connection with MQTT Broker :: {mqtt_host}")
+    mqttClient = MQTTClient(client_id=mqtt_client_id, server=mqtt_host, user=mqtt_username, password=mqtt_password, keepalive=60)
+    mqttClient.connect()
+    while True:
+        # Read the data from sensor
+#        temp, hum= readDHT()
+        dSensor.measure()
+        temp = dSensor.temperature()
+        hum = dSensor.humidity()
+        print(f'Temperature= {temp:.1f}C')
+        print(f'Humidity= {hum:.1f}%')
+        # Display the data on OLED
+        displayDhtData(temp, hum)
+        # Publish the data to the topics
+        mqttClient.publish(mqtt_publish_temp_topic, str(temp))
+        mqttClient.publish(mqtt_publish_hum_topic, str(hum))
+        # Wait for interval time
+        time.sleep(20)
 
-while True:
-    # Read the data from sensor
-    temp, hum= readDHT()
-    # Display the data on OLED
-    printDhtData(temp, hum)
-    # Publish the data to the topic
-    publishData(temp, hum)
-    time.sleep(30)
+if __name__ == "__main__":
+    while True:
+        try:
+            main()
+        except OSError as e:
+            print("Error: " + str(e))
+            reset()
