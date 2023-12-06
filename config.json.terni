@@ -7,8 +7,8 @@
         "HOST": "riccos.mooo.com",
         "USERNAME": "pi",
         "PASSWORD": "C0st4nz1",
-        "CLIENT_ID": "pico-002",
-        "TOPIC_TEMP01": "casaterni/sala/temperatura/sens01",
-        "TOPIC_HUM01": "casaterni/sala/umidita/sens01"
+        "CLIENT_ID": "pico-003",
+        "TOPIC_TEMP01": "casaterni/camera/temperatura/sens01",
+        "TOPIC_HUM01": "casaterni/camera/umidita/sens01"
     }
 }    

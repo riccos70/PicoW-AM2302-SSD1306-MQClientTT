@@ -1,0 +1,14 @@
+{
+    "WIFI": {
+        "SSID": "CasaGrottiWifi",
+        "PASSWORD": "costanzi2022!"        
+    },
+    "MQTT": {
+        "HOST": "riccos.mooo.com",
+        "USERNAME": "pi",
+        "PASSWORD": "C0st4nz1",
+        "CLIENT_ID": "pico-001",
+        "TOPIC_TEMP01": "casagrotti/sala/temperatura/sens01",
+        "TOPIC_HUM01": "casagrotti/sala/umidita/sens01"
+    }
+}    

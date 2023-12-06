@@ -16,8 +16,8 @@ with open('config.json', 'r') as f:
 mqtt_host = config['MQTT']['HOST']
 mqtt_username = config['MQTT']['USERNAME']  
 mqtt_password = config['MQTT']['PASSWORD']
-mqtt_publish_temp_topic = "casaterni/sala/temperatura/sens01"  # The MQTT topic
-mqtt_publish_hum_topic = "casaterni/sala/umidita/sens01"  # The MQTT topic
+mqtt_publish_temp_topic = config['MQTT']['TOPIC_TEMP01']
+mqtt_publish_hum_topic = config['MQTT']['TOPIC_HUM01']
 mqtt_client_id = config['MQTT']['CLIENT_ID']
 
 # Fill in sensor details
