@@ -8,5 +8,5 @@ Leggere file Assemblaggio.txt
 ### Installatione
 - Istallare i seguenti packeges sul device pico:
     - ssd1306
-    - umqtt
+    - micropython_umqtt.simple
 - Copiare il file PicoW-AM2302-SSD1306-MQClientTT.py su file main.py e posizionarlo dentro al device pico
