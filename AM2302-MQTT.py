@@ -1,9 +1,10 @@
-# AM2302 with display and MQTT on PICO W device
+# DS18B20 with MQTT on PICO W device
 
 import ujson
 import dht 
 import network
 import time
+import random
 import machine
 from machine import Pin
 from umqtt.simple import MQTTClient
@@ -15,12 +16,16 @@ with open('config.json', 'r') as f:
 mqtt_host = config['MQTT']['HOST']
 mqtt_username = config['MQTT']['USERNAME']  
 mqtt_password = config['MQTT']['PASSWORD']
-mqtt_publish_temp_topic = config['MQTT']['TOPIC_TEMP01']
-mqtt_publish_hum_topic = config['MQTT']['TOPIC_HUM01']
-mqtt_client_id = config['MQTT']['CLIENT_ID']
+ttype = config['TOPIC']['TYPE']
+tarea = config['TOPIC']['AREA']
+tzone = config['TOPIC']['ZONE']
+mqtt_publish_topic = ttype+"/"+tarea+"/"+tzone
+mqtt_client_id = f'publish-{random.randint(0, 1000)}'
 
 # Fill in sensor details
 dSensor = dht.DHT22(Pin(2))
+mis01 = config['DATA']['MEAS01']
+mis02 = config['DATA']['MEAS02']
 
 def reset():
     print("Resetting...")
@@ -32,18 +37,16 @@ def main():
     mqttClient = MQTTClient(client_id=mqtt_client_id, server=mqtt_host, user=mqtt_username, password=mqtt_password, keepalive=60)
     mqttClient.connect()
     while True:
-
         # Read the data from sensor
         dSensor.measure()
         temp = dSensor.temperature()
         hum = dSensor.humidity()
-        print(f'Temperature= {temp:.1f}C')
-        print(f'Humidity= {hum:.1f}%')
+        msg = "{\"area\": \""+tarea+"\", \"zone\": \""+tzone+"\", \""+mis01+"\": " + str(temp) + ", \""+mis02+"\": " + str(hum) + "}"
+        print(msg)
         # Publish the data to the topics
-        mqttClient.publish(mqtt_publish_temp_topic, str(temp))
-        mqttClient.publish(mqtt_publish_hum_topic, str(hum))
+        mqttClient.publish(mqtt_publish_topic, msg)
         # Wait for interval time
-        time.sleep(20)
+        time.sleep(30)
 
 if __name__ == "__main__":
     while True:
