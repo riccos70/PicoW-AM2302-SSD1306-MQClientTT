@@ -6,6 +6,8 @@ import network
 import time
 import random
 import machine
+import boot
+
 from machine import Pin
 from umqtt.simple import MQTTClient
 
@@ -27,17 +29,16 @@ dSensor = dht.DHT22(Pin(2))
 mis01 = config['DATA']['MEAS01']
 mis02 = config['DATA']['MEAS02']
 
-def reset():
-    print("Resetting...")
-    time.sleep(5)
-    machine.reset()
+
 
 def main():
-    print(f"Begin connection with MQTT Broker :: {mqtt_host}")
+    print(f"Starting connection with MQTT Broker :: {mqtt_host}")
     mqttClient = MQTTClient(client_id=mqtt_client_id, server=mqtt_host, user=mqtt_username, password=mqtt_password, keepalive=60)
     mqttClient.connect()
+    print(f"Connected with MQTT Broker :: {mqtt_host}")
     while True:
         # Read the data from sensor
+        boot.do_connect()
         dSensor.measure()
         temp = dSensor.temperature()
         hum = dSensor.humidity()
@@ -48,10 +49,8 @@ def main():
         # Wait for interval time
         time.sleep(30)
 
+
 if __name__ == "__main__":
-    while True:
-        try:
-            main()
-        except OSError as e:
-            print("Error: " + str(e))
-            reset()
+    main()
+
+
